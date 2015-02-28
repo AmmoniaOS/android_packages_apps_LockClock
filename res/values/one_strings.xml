@@ -17,4 +17,5 @@
   <string name="weather_source_title">Weather source</string>
   <string name="weather_refreshing">Is being refreshed...</string>
   <string name="weather_refresh">Refresh</string>
+  <string name="weather_no_network">Please connect to the network and try again!</string>
 </resources>

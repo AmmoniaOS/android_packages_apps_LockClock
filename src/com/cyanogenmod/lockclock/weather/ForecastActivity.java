@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.MenuItem;
 import android.view.Menu;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 import com.cyanogenmod.lockclock.misc.Constants;
 import com.cyanogenmod.lockclock.misc.Preferences;
@@ -129,30 +130,39 @@ public class ForecastActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        final Intent i = new Intent(this, WeatherUpdateService.class);
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
             case 0:
-                mProgressDialog = new ProgressDialog(this);
-                mProgressDialog.setMessage(getString(R.string.weather_refreshing));
-                mProgressDialog.setIndeterminate(true);
-                mProgressDialog.setCancelable(true);
-                mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                   @Override
-                   public void onCancel(DialogInterface dialog) {
-                       mProgressDialog.dismiss();
-                       mProgressDialog = null;
-                       stopService(i);
-                   }
-                });
-                mProgressDialog.show();
-
-                i.setAction(WeatherUpdateService.ACTION_FORCE_UPDATE);
-                startService(i);
+                checkUpdate();
                 return true;
         }
         return true;
+    }
+
+    private void checkUpdate() {
+        final Intent i = new Intent(this, WeatherUpdateService.class);
+        if (!OneUtils.isOnline(this)) {
+            Toast.makeText(this, R.string.weather_no_network, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.weather_refreshing));
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+          @Override
+          public void onCancel(DialogInterface dialog) {
+              mProgressDialog.dismiss();
+              mProgressDialog = null;
+              stopService(i);
+          }
+        });
+        mProgressDialog.show();
+
+        i.setAction(WeatherUpdateService.ACTION_FORCE_UPDATE);
+        startService(i);
     }
 }
