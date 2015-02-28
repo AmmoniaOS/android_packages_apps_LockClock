@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="weather_source_title">Weather</string>
+  <string name="weather_source_title">Weather source</string>
   <string name="weather_refreshing">Is being refreshed...</string>
   <string name="weather_refresh">Refresh</string>
 </resources>
