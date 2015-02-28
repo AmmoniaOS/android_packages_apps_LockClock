@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 David van Tonder
+ * Copyright (C) 2015 The OneUI Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use context file except in compliance with the License.
@@ -102,13 +103,9 @@ public class ForecastBuilder {
 
         // Get things ready
         LinearLayout forecastView = (LinearLayout) view.findViewById(R.id.forecast_view);
-        final View progressIndicator = view.findViewById(R.id.progress_indicator);
 
         // Build the forecast panel
-        if (buildSmallPanel(context, forecastView, w)) {
-            // Success, hide the progress container
-            progressIndicator.setVisibility(View.GONE);
-        }
+        if (buildSmallPanel(context, forecastView, w)) {}
 
         return view;
     }

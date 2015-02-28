@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 David van Tonder
+ * Copyright (C) 2015 The OneUI Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,40 +17,47 @@
 package com.cyanogenmod.lockclock.weather;
 
 import android.annotation.SuppressLint;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.KeyguardManager;
-import android.app.WallpaperManager;
+import android.app.ActionBar;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.MenuItem;
+import android.view.Menu;
 import android.view.View.OnClickListener;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
-import android.widget.ImageView;
 
 import com.cyanogenmod.lockclock.misc.Constants;
 import com.cyanogenmod.lockclock.misc.Preferences;
-import com.cyanogenmod.lockclock.misc.WidgetUtils;
 import com.cyanogenmod.lockclock.R;
+import com.android.internal.util.one.OneUtils;
 
-public class ForecastActivity extends Activity implements OnClickListener {
+public class ForecastActivity extends Activity {
     private static final String TAG = "ForecastActivity";
+
+    private static final String KEY_LAST_HOUR_COLOR = "last_hour_color";
+    private int mLastHourColor = 0;
+
+    private ProgressDialog mProgressDialog;
+    private SharedPreferences prefs;
 
     private BroadcastReceiver mUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Stop the animation
-            ImageView view = (ImageView) findViewById(R.id.weather_refresh);
-            view.setAnimation(null);
-
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+                mProgressDialog = null;
+            }
             if (!intent.getBooleanExtra(WeatherUpdateService.EXTRA_UPDATE_CANCELLED, false)) {
                 updateForecastPanel();
             }
@@ -59,49 +66,44 @@ public class ForecastActivity extends Activity implements OnClickListener {
 
     @SuppressLint("InlinedApi")
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        // If we are in keyguard, override the default transparent theme
-        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        boolean locked = km.isKeyguardLocked();
-        if (locked) {
-            if (WidgetUtils.isTranslucencyAvailable()) {
-                setTheme(android.R.style.Theme_Holo_NoActionBar_TranslucentDecor);
-            } else {
-                setTheme(android.R.style.Theme_Holo_NoActionBar);
-            }
-        }
-        super.onCreate(savedInstanceState);
-
-        // Get the window ready
-        Window window = getWindow();
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        if (locked) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                    | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
-            final Drawable wallpaperDrawable = wallpaperManager.getFastDrawable();
-            window.setBackgroundDrawable(wallpaperDrawable);
-        } else if (WidgetUtils.isTranslucencyAvailable()) {
-            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        getWindow().setBackgroundDrawable(null);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mLastHourColor = prefs.getInt(KEY_LAST_HOUR_COLOR, 0);
+        if (mLastHourColor != 0) {
+            getWindow().getDecorView().setBackgroundColor(mLastHourColor);
         }
 
+        setBackgroundColor();
         registerReceiver(mUpdateReceiver, new IntentFilter(WeatherUpdateService.ACTION_UPDATE_FINISHED));
         updateForecastPanel();
+        
+        final ActionBar bar = getActionBar();
+        bar.setDisplayHomeAsUpEnabled(true);
+        invalidateOptionsMenu();
+    }
+
+    private void setBackgroundColor() {
+        if (mLastHourColor == 0) {
+            mLastHourColor = getResources().getColor(R.color.default_background);
+        }
+        int currHourColor = OneUtils.getCurrentHourColor();
+        ObjectAnimator animator = ObjectAnimator.ofInt(getWindow().getDecorView(),
+                    "backgroundColor", mLastHourColor, currHourColor);
+        animator.setDuration(3000);
+        animator.setEvaluator(new ArgbEvaluator());
+        animator.start();
+        mLastHourColor = currHourColor;
     }
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(mUpdateReceiver);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_LAST_HOUR_COLOR, mLastHourColor);
+        editor.apply();
         super.onDestroy();
-    }
-
-    @Override
-    protected void onUserLeaveHint() {
-        super.onUserLeaveHint();
-        finish();
     }
 
     private void updateForecastPanel() {
@@ -115,33 +117,43 @@ public class ForecastActivity extends Activity implements OnClickListener {
 
         View fullLayout = ForecastBuilder.buildFullPanel(this, R.layout.forecast_activity, weather);
         setContentView(fullLayout);
-        fullLayout.requestFitSystemWindows();
-
-        // Register an onClickListener on Weather refresh
-        findViewById(R.id.weather_refresh).setOnClickListener(this);
-
-        // Register an onClickListener on the fake done button
-        findViewById(R.id.button).setOnClickListener(this);
     }
 
     @Override
-    public void onClick(View v) {
-        if (v.getId() != R.id.button) {
-            // Setup anim with desired properties and start the animation
-            ImageView view = (ImageView) findViewById(R.id.weather_refresh);
-            RotateAnimation anim = new RotateAnimation(0.0f, 360.0f,
-                    Animation.RELATIVE_TO_SELF, 0.5f,
-                    Animation.RELATIVE_TO_SELF, 0.5f);
-            anim.setInterpolator(new LinearInterpolator());
-            anim.setRepeatCount(Animation.INFINITE);
-            anim.setDuration(700);
-            view.startAnimation(anim); 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, 0, 0, R.string.weather_refresh)
+                .setShowAsActionFlags(
+                        MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        return true;
+    }
 
-            Intent i = new Intent(this, WeatherUpdateService.class);
-            i.setAction(WeatherUpdateService.ACTION_FORCE_UPDATE);
-            startService(i);
-        } else {
-            finish();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final Intent i = new Intent(this, WeatherUpdateService.class);
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case 0:
+                mProgressDialog = new ProgressDialog(this);
+                mProgressDialog.setTitle(R.string.weather_refreshing);
+                mProgressDialog.setMessage(getString(R.string.weather_refreshing));
+                mProgressDialog.setIndeterminate(true);
+                mProgressDialog.setCancelable(true);
+                mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                   @Override
+                   public void onCancel(DialogInterface dialog) {
+                       mProgressDialog.dismiss();
+                       mProgressDialog = null;
+                       stopService(i);
+                   }
+                });
+                mProgressDialog.show();
+
+                i.setAction(WeatherUpdateService.ACTION_FORCE_UPDATE);
+                startService(i);
+                return true;
         }
+        return true;
     }
 }

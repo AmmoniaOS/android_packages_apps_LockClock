@@ -28,4 +28,8 @@
     <color name="colorPrimaryDark">#294d8c</color>
     <color name="colorAccent">#3462b3</color>
 
+    <color name="default_background">#5c6bc0</color>
+    <color name="white">#ffffff</color>
+    <color name="status_bar">#26000000</color>
+
 </resources>
