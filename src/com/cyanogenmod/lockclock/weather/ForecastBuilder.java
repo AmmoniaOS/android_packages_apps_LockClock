@@ -41,6 +41,9 @@ import com.cyanogenmod.lockclock.misc.WidgetUtils;
 import com.cyanogenmod.lockclock.weather.WeatherInfo.DayForecast;
 import com.cyanogenmod.lockclock.R;
 
+import com.android.internal.util.one.OneUtils;
+import com.android.internal.util.one.Lunar;
+
 public class ForecastBuilder {
     private static final String TAG = "ForecastBuilder";
 
@@ -84,6 +87,17 @@ public class ForecastBuilder {
         // City
         TextView city = (TextView) view.findViewById(R.id.weather_city);
         city.setText(w.getCity());
+
+        // lunar
+        TextView lunartext = (TextView) view.findViewById(R.id.weather_lunar);
+        Calendar c = Calendar.getInstance();
+        int Y = c.get(Calendar.YEAR);
+        int M = c.get(Calendar.MONTH);
+        int D = c.get(Calendar.DATE);
+        c.set(Y,M,D);
+        Lunar lunar = new Lunar(c);
+        String lur = OneUtils.isSupportLanguage(true) ? lunar.toString() : null;
+        lunartext.setText(lur);
 
         // Weather Update Time
         Date lastUpdate = w.getTimestamp();

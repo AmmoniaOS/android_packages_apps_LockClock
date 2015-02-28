@@ -103,6 +103,15 @@
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="10sp" />
 
+    <TextView
+        android:id="@+id/weather_lunar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/weather_source"
+        android:layout_centerHorizontal="true"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <ImageView
         android:id="@+id/weather_divider"
         android:layout_width="match_parent"
