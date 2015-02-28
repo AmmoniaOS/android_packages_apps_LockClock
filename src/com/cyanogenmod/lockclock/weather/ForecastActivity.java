@@ -125,6 +125,9 @@ public class ForecastActivity extends Activity {
         menu.add(0, 0, 0, R.string.weather_refresh)
                 .setShowAsActionFlags(
                         MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        menu.add(0, 1, 0, R.string.weather_settings)
+                .setShowAsActionFlags(
+                        MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
         return true;
     }
 
@@ -136,6 +139,9 @@ public class ForecastActivity extends Activity {
                 return true;
             case 0:
                 checkUpdate();
+                return true;
+            case 1:
+                startActivity(new Intent(ForecastActivity.this, WeatherSettingsActivity.class));
                 return true;
         }
         return true;

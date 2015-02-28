@@ -60,6 +60,9 @@
         <activity android:name=".preference.CalendarPreferences" />
         <activity android:name=".preference.WeatherPreferences" />
 
+        <activity android:name=".weather.WeatherSettingsActivity" 
+                  android:theme="@style/Weather" />
+
         <!-- The weather forecast activity -->
         <activity android:name=".weather.ForecastActivity"
             android:hardwareAccelerated="true"

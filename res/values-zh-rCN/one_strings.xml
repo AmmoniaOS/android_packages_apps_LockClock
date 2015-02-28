@@ -18,4 +18,5 @@
   <string name="weather_refreshing">正在刷新中...</string>
   <string name="weather_refresh">刷新</string>
   <string name="weather_no_network">请连接网络再试！</string>
+  <string name="weather_settings">设置</string>
 </resources>
