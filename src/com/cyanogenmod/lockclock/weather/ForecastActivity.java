@@ -136,7 +136,6 @@ public class ForecastActivity extends Activity {
                 return true;
             case 0:
                 mProgressDialog = new ProgressDialog(this);
-                mProgressDialog.setTitle(R.string.weather_refreshing);
                 mProgressDialog.setMessage(getString(R.string.weather_refreshing));
                 mProgressDialog.setIndeterminate(true);
                 mProgressDialog.setCancelable(true);

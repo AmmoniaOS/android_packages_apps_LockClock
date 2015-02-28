@@ -80,8 +80,6 @@
   <string name="weather_NW">西北</string>
   <string name="weather_no_data">无数据</string>
   <string name="weather_tap_to_refresh">请点击刷新</string>
-  <string name="weather_refresh">刷新</string>
-  <string name="weather_refreshing">正在刷新</string>
   <string name="weather_last_sync_just_now">刚刚</string>
   <string name="weather_cannot_reach_provider">暂时无法访问 %s</string>
   <string name="weather_refresh_manual">手动</string>
