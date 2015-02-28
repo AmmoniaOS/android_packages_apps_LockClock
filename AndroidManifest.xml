@@ -61,7 +61,14 @@
         <activity android:name=".preference.WeatherPreferences" />
 
         <activity android:name=".weather.WeatherSettingsActivity" 
-                  android:theme="@style/Weather" />
+            android:theme="@style/Weather"
+            android:label="@string/weather_settings"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
 
         <!-- The weather forecast activity -->
         <activity android:name=".weather.ForecastActivity"
