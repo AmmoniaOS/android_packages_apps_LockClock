@@ -71,10 +71,6 @@ public class ForecastActivity extends Activity {
         super.onCreate(icicle);
         getWindow().setBackgroundDrawable(null);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mLastHourColor = prefs.getInt(KEY_LAST_HOUR_COLOR, 0);
-        if (mLastHourColor != 0) {
-            getWindow().getDecorView().setBackgroundColor(mLastHourColor);
-        }
 
         setBackgroundColor();
         registerReceiver(mUpdateReceiver, new IntentFilter(WeatherUpdateService.ACTION_UPDATE_FINISHED));
@@ -88,10 +84,11 @@ public class ForecastActivity extends Activity {
     private void setBackgroundColor() {
         if (mLastHourColor == 0) {
             mLastHourColor = getResources().getColor(R.color.default_background);
+        } else {
+            mLastHourColor = prefs.getInt(KEY_LAST_HOUR_COLOR, 0);
         }
-        int currHourColor = OneUtils.getCurrentHourColor();
         ObjectAnimator animator = ObjectAnimator.ofInt(getWindow().getDecorView(),
-                    "backgroundColor", mLastHourColor, currHourColor);
+                    "backgroundColor", mLastHourColor, OneUtils.getCurrentHourColor());
         animator.setDuration(3000);
         animator.setEvaluator(new ArgbEvaluator());
         animator.start();
