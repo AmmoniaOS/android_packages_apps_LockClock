@@ -82,17 +82,16 @@ public class ForecastActivity extends Activity {
     }
 
     private void setBackgroundColor() {
+        mLastHourColor = prefs.getInt(KEY_LAST_HOUR_COLOR, 0);
         if (mLastHourColor == 0) {
             mLastHourColor = getResources().getColor(R.color.default_background);
-        } else {
-            mLastHourColor = prefs.getInt(KEY_LAST_HOUR_COLOR, 0);
         }
         ObjectAnimator animator = ObjectAnimator.ofInt(getWindow().getDecorView(),
                     "backgroundColor", mLastHourColor, OneUtils.getCurrentHourColor());
         animator.setDuration(3000);
         animator.setEvaluator(new ArgbEvaluator());
         animator.start();
-        mLastHourColor = currHourColor;
+        mLastHourColor = OneUtils.getCurrentHourColor();
     }
 
     @Override
